@@ -56,6 +56,31 @@ public class EagerSingleton {
 
 ---
 
+### 4.5. Lazy Loading Implementation
+
+```java
+public class LazySingleton {
+    // 1. Declare the instance variable but DO NOT initialize it yet
+    private static LazySingleton instance;
+
+    // 2. Private constructor to prevent instantiation from outside
+    private LazySingleton() {
+        // Initialization code here
+    }
+
+    // 3. Global access point with lazy initialization
+    public static LazySingleton getInstance() {
+        if (instance == null) {
+            // The object is ONLY created when this method is called for the first time
+            instance = new LazySingleton();
+        }
+        return instance;
+    }
+}
+```
+
+---
+
 ### 5. Thread Safety
 **The Problem:**
 In a multi-threaded application using Lazy Loading, two separate threads might reach the `if (instance == null)` line at the exact same millisecond. 
