@@ -104,7 +104,60 @@ public class PaymentService {
 }
 ```
 
-### 2. The Facade
+### 2. The Parameter Object & Builder
+
+To prevent the facade methods from taking too many arguments (which is a code smell), we group them into a single `BookingRequest` parameter object. We construct this object using the **Builder Pattern**:
+
+```java
+// BookingRequest.java
+public class BookingRequest {
+    private final String movieId;
+    private final String seatId;
+    private final String paymentMethod;
+    private final int loyaltyPoints;
+    private final double amount;
+    private final String email;
+    private final String message;
+    private final String userId;
+
+    private BookingRequest(Builder builder) {
+        this.movieId = builder.movieId;
+        this.seatId = builder.seatId;
+        this.paymentMethod = builder.paymentMethod;
+        this.loyaltyPoints = builder.loyaltyPoints;
+        this.amount = builder.amount;
+        this.email = builder.email;
+        this.message = builder.message;
+        this.userId = builder.userId;
+    }
+
+    // getters for all properties ...
+
+    public static class Builder {
+        private String movieId;
+        private String seatId;
+        private String paymentMethod;
+        private int loyaltyPoints;
+        private double amount;
+        private String email;
+        private String message;
+        private String userId;
+
+        public Builder setMovieId(String movieId) { this.movieId = movieId; return this; }
+        public Builder setSeatId(String seatId) { this.seatId = seatId; return this; }
+        public Builder setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; return this; }
+        public Builder setLoyaltyPoints(int loyaltyPoints) { this.loyaltyPoints = loyaltyPoints; return this; }
+        public Builder setAmount(double amount) { this.amount = amount; return this; }
+        public Builder setEmail(String email) { this.email = email; return this; }
+        public Builder setMessage(String message) { this.message = message; return this; }
+        public Builder setUserId(String userId) { this.userId = userId; return this; }
+
+        public BookingRequest build() { return new BookingRequest(this); }
+    }
+}
+```
+
+### 3. The Facade
 
 The `MovingBookingFacade` encapsulates all the subsystems and coordinates them:
 
@@ -125,31 +178,28 @@ public class MovingBookingFacade {
         this.loyalityPointService = new LoyalityPointService();
     }
 
-    public void bookTicket(String movieId, String seatId, String paymentMethod, int loyaltyPoints, double amount,
-                           String email, String message, String userId) {
-        // Sequenced workflow execution
-        paymentService.processPayment(movieId, amount, paymentMethod);
-        seatReservationService.reserveSeat(seatId, movieId);
-        ticketService.generateTicket(movieId, seatId);
-        notificationService.sendNotification(email, message);
-        loyalityPointService.redeemLoyalityPoints(userId, loyaltyPoints);
+    public void bookTicket(BookingRequest request) {
+        // Sequenced workflow execution extracting fields from the request parameter object
+        paymentService.processPayment(request.getMovieId(), request.getAmount(), request.getPaymentMethod());
+        seatReservationService.reserveSeat(request.getSeatId(), request.getMovieId());
+        ticketService.generateTicket(request.getMovieId(), request.getSeatId());
+        notificationService.sendNotification(request.getEmail(), request.getMessage());
+        loyalityPointService.redeemLoyalityPoints(request.getUserId(), request.getLoyaltyPoints());
     }
 
-    public void cancelTicket(String movieId, String seatId, String paymentMethod, int loyaltyPoints, double amount,
-                             String email, String message, String userId) {
+    public void cancelTicket(BookingRequest request) {
         // Rollback / cancellation sequence
-        paymentService.cancelPayment(movieId, amount, paymentMethod);
-        seatReservationService.cancelSeat(seatId, movieId);
-        ticketService.cancelTicket(movieId, seatId);
-        notificationService.sendNotification(email, message);
-        loyalityPointService.redeemLoyalityPoints(userId, loyaltyPoints);
+        paymentService.cancelPayment(request.getMovieId(), request.getAmount(), request.getPaymentMethod());
+        seatReservationService.cancelSeat(request.getSeatId(), request.getMovieId());
+        ticketService.cancelTicket(request.getMovieId(), request.getSeatId());
+        notificationService.sendNotification(request.getEmail(), request.getMessage());
     }
 }
 ```
 
-### 3. The Client (`Main.java`)
+### 4. The Client (`Main.java`)
 
-Instead of instantiating five different classes and calling their methods in order, the client just does:
+Instead of instantiating five different classes and calling their methods in order, or passing a massive list of 8 parameters, the client constructs the request using the Builder and passes it:
 
 ```java
 // Main.java
@@ -158,11 +208,19 @@ public class Main {
         System.out.println("--- Movie Booking via Facade Pattern ---");
         MovingBookingFacade bookingFacade = new MovingBookingFacade();
 
-        // Single client call to perform the entire complex sequence
-        bookingFacade.bookTicket(
-            "Movie1", "Seat1", "Account1", 100, 500.00, 
-            "Email1", "Booking Confirmation", "User1"
-        );
+        // Single client call to perform the entire complex sequence using a Builder request
+        BookingRequest request = new BookingRequest.Builder()
+                .setMovieId("Movie1")
+                .setSeatId("Seat1")
+                .setPaymentMethod("Account1")
+                .setLoyaltyPoints(100)
+                .setAmount(500.00)
+                .setEmail("Email1")
+                .setMessage("Booking Confirmation")
+                .setUserId("User1")
+                .build();
+
+        bookingFacade.bookTicket(request);
     }
 }
 ```
