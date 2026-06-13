@@ -29,26 +29,24 @@ public class MovingBookingFacade {
     /**
      * Orchestrates the complete workflow to book a movie ticket.
      */
-    public void bookTicket(String movieId, String seatId, String paymentMethod, int loyalityPoint, double amount,
-            String email, String message, String userId) {
+    public void bookTicket(BookingRequest request) {
 
-        paymentService.processPayment(movieId, amount, paymentMethod);
-        seatReservationService.reserveSeat(seatId, movieId);
-        ticketService.generateTicket(movieId, seatId);
-        notificationService.sendNotification(email, message);
-        loyalityPointService.redeemLoyalityPoints(userId, loyalityPoint);
+        paymentService.processPayment(request.getMovieId(), request.getAmount(), request.getPaymentMethod());
+        seatReservationService.reserveSeat(request.getSeatId(), request.getMovieId());
+        ticketService.generateTicket(request.getMovieId(), request.getSeatId());
+        notificationService.sendNotification(request.getEmail(), request.getMessage());
+        loyalityPointService.redeemLoyalityPoints(request.getUserId(), request.getLoyaltyPoints());
     }
 
     /**
      * Orchestrates the workflow to cancel a movie ticket booking.
      */
-    public void cancelTicket(String movieId, String seatId, String paymentMethod, int loyalityPoint, double amount,
-            String email, String message, String userId) {
+    public void cancelTicket(BookingRequest request) {
 
-        paymentService.cancelPayment(movieId, amount, paymentMethod);
-        seatReservationService.cancelSeat(seatId, movieId);
-        ticketService.cancelTicket(movieId, seatId);
-        notificationService.sendNotification(email, message);
+        paymentService.cancelPayment(request.getMovieId(), request.getAmount(), request.getPaymentMethod());
+        seatReservationService.cancelSeat(request.getSeatId(), request.getMovieId());
+        ticketService.cancelTicket(request.getMovieId(), request.getSeatId());
+        notificationService.sendNotification(request.getEmail(), request.getMessage());
 
     }
 
