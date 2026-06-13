@@ -157,9 +157,9 @@ public class BookingRequest {
 }
 ```
 
-### 3. The Facade
+### 3. The Facade (Supporting Both Phases via Method Overloading)
 
-The `MovingBookingFacade` encapsulates all the subsystems and coordinates them:
+The `MovingBookingFacade` encapsulates all the subsystems and coordinates them. It supports both the direct arguments signature (Phase 1) and the request object signature (Phase 2):
 
 ```java
 // MovingBookingFacade.java
@@ -178,8 +178,29 @@ public class MovingBookingFacade {
         this.loyalityPointService = new LoyalityPointService();
     }
 
+    // --- PHASE 1: Direct Parameter Passing ---
+    public void bookTicket(String movieId, String seatId, String paymentMethod, int loyaltyPoints, double amount,
+                           String email, String message, String userId) {
+        System.out.println("[Facade Phase 1] Booking via direct arguments...");
+        paymentService.processPayment(movieId, amount, paymentMethod);
+        seatReservationService.reserveSeat(seatId, movieId);
+        ticketService.generateTicket(movieId, seatId);
+        notificationService.sendNotification(email, message);
+        loyalityPointService.redeemLoyalityPoints(userId, loyaltyPoints);
+    }
+
+    public void cancelTicket(String movieId, String seatId, String paymentMethod, int loyaltyPoints, double amount,
+                             String email, String message, String userId) {
+        System.out.println("[Facade Phase 1] Cancelling via direct arguments...");
+        paymentService.cancelPayment(movieId, amount, paymentMethod);
+        seatReservationService.cancelSeat(seatId, movieId);
+        ticketService.cancelTicket(movieId, seatId);
+        notificationService.sendNotification(email, message);
+    }
+
+    // --- PHASE 2: Facade + Builder Parameter Passing ---
     public void bookTicket(BookingRequest request) {
-        // Sequenced workflow execution extracting fields from the request parameter object
+        System.out.println("[Facade Phase 2] Booking via Builder BookingRequest...");
         paymentService.processPayment(request.getMovieId(), request.getAmount(), request.getPaymentMethod());
         seatReservationService.reserveSeat(request.getSeatId(), request.getMovieId());
         ticketService.generateTicket(request.getMovieId(), request.getSeatId());
@@ -188,7 +209,7 @@ public class MovingBookingFacade {
     }
 
     public void cancelTicket(BookingRequest request) {
-        // Rollback / cancellation sequence
+        System.out.println("[Facade Phase 2] Cancelling via Builder BookingRequest...");
         paymentService.cancelPayment(request.getMovieId(), request.getAmount(), request.getPaymentMethod());
         seatReservationService.cancelSeat(request.getSeatId(), request.getMovieId());
         ticketService.cancelTicket(request.getMovieId(), request.getSeatId());
@@ -199,16 +220,29 @@ public class MovingBookingFacade {
 
 ### 4. The Client (`Main.java`)
 
-Instead of instantiating five different classes and calling their methods in order, or passing a massive list of 8 parameters, the client constructs the request using the Builder and passes it:
+We demonstrate both execution paths in our main entry point:
 
 ```java
 // Main.java
 public class Main {
     public static void main(String[] args) {
-        System.out.println("--- Movie Booking via Facade Pattern ---");
         MovingBookingFacade bookingFacade = new MovingBookingFacade();
 
-        // Single client call to perform the entire complex sequence using a Builder request
+        System.out.println("==================================================");
+        System.out.println("PHASE 1: Pure Facade Pattern (Direct Arguments)");
+        System.out.println("==================================================");
+
+        // Direct parameters call
+        bookingFacade.bookTicket(
+                "Movie1", "Seat1", "Account1", 100, 500.00, 
+                "Email1", "Booking Confirmation - Phase 1", "User1"
+        );
+
+        System.out.println("\n==================================================");
+        System.out.println("PHASE 2: Facade + Builder Pattern (Request Object)");
+        System.out.println("==================================================");
+
+        // Builder pattern request construction
         BookingRequest request = new BookingRequest.Builder()
                 .setMovieId("Movie1")
                 .setSeatId("Seat1")
@@ -216,10 +250,11 @@ public class Main {
                 .setLoyaltyPoints(100)
                 .setAmount(500.00)
                 .setEmail("Email1")
-                .setMessage("Booking Confirmation")
+                .setMessage("Booking Confirmation - Phase 2")
                 .setUserId("User1")
                 .build();
 
+        // Single object parameter call
         bookingFacade.bookTicket(request);
     }
 }
