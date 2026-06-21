@@ -15,14 +15,14 @@ public class SlotService {
 
     public Optional<ParkingSlot> allocateSlot(Vehicle.VehicleType vehicleType) {
         System.out.println("[SERVICE] Allocating slot for vehicle type: " + vehicleType);
-        
+
         Optional<ParkingSlot> slot = slotRepository.allocateSlot(vehicleType);
         if (slot.isPresent()) {
             System.out.println("[SERVICE] Slot allocated successfully: " + slot.get().getId());
         } else {
             System.out.println("[SERVICE] No available slots for vehicle type: " + vehicleType);
         }
-        
+
         return slot;
     }
 
