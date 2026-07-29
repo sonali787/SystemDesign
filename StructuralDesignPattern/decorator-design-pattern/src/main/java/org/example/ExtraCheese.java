@@ -1,18 +1,19 @@
 package org.example;
 
-public class ExtraCheese extends PizzaDecorator{
+/** Concrete Decorator — wraps any {@link Pizza} and adds extra cheese (+50). */
+public class ExtraCheese extends PizzaDecorator {
 
-
-    public ExtraCheese(Pizza pizza){
+    public ExtraCheese(Pizza pizza) {
         super(pizza);
     }
+
     @Override
     public String getDescription() {
-        return "";
+        return pizza.getDescription() + ", Extra Cheese";
     }
 
     @Override
     public double getCost() {
-        return 0;
+        return pizza.getCost() + 50;
     }
 }

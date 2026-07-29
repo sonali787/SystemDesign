@@ -44,6 +44,8 @@ class FutureExample {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        executor.shutdown();
     }
 
 }
