@@ -1,0 +1,18 @@
+# OS files
+.DS_Store
+
+# IDEs and Editors
+.idea/
+*.iml
+.vscode/
+
+# Project configuration and tools
+.obsidian/
+
+# Build artifacts
+target/
+build/
+**/target/
+**/build/
+**/.idea/
+**/*.iml

@@ -1,6 +1,7 @@
 package org.example;
 
-abstract class PizzaDecorator implements Pizza{
+/** Abstract Decorator — base class for all concrete decorators. */
+abstract class PizzaDecorator implements Pizza {
     protected Pizza pizza;
 
     public PizzaDecorator(Pizza pizza){

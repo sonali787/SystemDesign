@@ -13,6 +13,15 @@ public class Main {
         Pizza withCheese = new ExtraCheese(new MarghrietaPizza());
         printOrder("Customer B", withCheese);
 
+        Pizza plainPizzawithCheese = new ExtraCheese(new PlainPizza());
+        printOrder("Customer D" , plainPizzawithCheese );
+
+        Pizza withOlives = new Olives(new PlainPizza());
+        printOrder("Customer E" , withOlives);
+
+        Pizza cheeseOlives = new Olives(withCheese);
+        printOrder("Customer F ",cheeseOlives);
+
         // Same combo as naive MargheritaWithExtraCheeseAndOlives — composed at runtime
         // (add Olives decorator when you implement it; for now, double cheese shows stacking)
         Pizza withDoubleCheese = new ExtraCheese(new ExtraCheese(new MarghrietaPizza()));

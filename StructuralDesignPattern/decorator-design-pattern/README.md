@@ -111,10 +111,12 @@ MargheritaPizza                  <<abstract>>
                                  - pizza: Pizza
                                  + PizzaDecorator(pizza)
                                        |
-                                       |
-                                  ExtraCheese
-                                  + getDescription()
-                                  + getCost()
+                          ___________|___________
+                         |                       |
+                   ExtraCheese               Olives
+              (Concrete Decorator)    (Concrete Decorator)
+                  + getDescription()      + getDescription()
+                  + getCost()               + getCost()
 ```
 
 ---
@@ -124,9 +126,11 @@ MargheritaPizza                  <<abstract>>
 | Class / Interface   | Role                    | Description                                                        |
 |---------------------|-------------------------|--------------------------------------------------------------------|
 | `Pizza`             | Component Interface     | Common interface for base pizzas and all decorators                |
-| `MargheritaPizza`   | Concrete Component      | The base object — a plain pizza with no toppings                   |
+| `MargheritaPizza`   | Concrete Component      | Base pizza — Margherita (Rs. 200)                                  |
+| `PlainPizza`        | Concrete Component      | Base pizza — plain (Rs. 100)                                       |
 | `PizzaDecorator`    | Abstract Decorator      | Holds a `Pizza` reference and passes it through the constructor    |
-| `ExtraCheese`       | Concrete Decorator      | Wraps any `Pizza` and adds extra cheese cost and description       |
+| `ExtraCheese`       | **Concrete Decorator**  | Wraps any `Pizza` and adds extra cheese (+50)                      |
+| `Olives`            | **Concrete Decorator**  | Wraps any `Pizza` and adds olives (+30)                            |
 
 ---
 
@@ -275,8 +279,10 @@ Every subclass constructor must call a parent constructor first. Because `PizzaD
 src/main/java/org/example/
 ├── Pizza.java              # Component interface
 ├── MargheritaPizza.java    # Concrete component (base pizza)
+├── PlainPizza.java         # Concrete component (base pizza)
 ├── PizzaDecorator.java     # Abstract decorator
 ├── ExtraCheese.java        # Concrete decorator (topping)
+├── Olives.java             # Concrete decorator (topping)
 └── Main.java               # Entry point
 ```
 
